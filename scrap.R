@@ -1,8 +1,7 @@
 ### SCRAPR
-
-
 library(XML)
 library(stringr)
+library(httr)
 
 nhl<-NULL
 years <- seq(from=1920,to=2017)

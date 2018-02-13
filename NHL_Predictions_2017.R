@@ -4,7 +4,7 @@
 library(neuralnet)
 
 
-setwd("C:/Users/AdamHendel/OneDrive/Analytics/NHL/Raw")
+# setwd("C:/Users/AdamHendel/OneDrive/Analytics/NHL/Raw")
 
 # # # Ste 1: Normalize the Raw Data # # #
 nhlData <- read.csv("NHL Stat DB_2008_2017.csv",
@@ -24,13 +24,12 @@ for (i in 1:length(years)){
 nhlCurr <- nhlData[nhlData$Year == 2017,]
 nhlCurr <- nhlCurr[nhlCurr$CY.Season.Rank < 18,]
 nhlCurr <- nhlCurr[nhlCurr$Team != "Tampa Bay Lightning",]
+
 # remove teams that didnt make playoffs, and not current year
 nhlData <- nhlData[nhlData$Year < 2017,]
 nhlData <- nhlData[nhlData$CY.Playoff.Rank < 17,]
 
-
-
-#replace NA values with zeros (z score of zero)
+# replace NA values with zeros (z score of zero)
 nhlData[is.na(nhlData)] <- 0
 nhlCurr[is.na(nhlCurr)] <- 0
 #set outliers >3, equal to 3
@@ -41,8 +40,10 @@ nhlCurr[is.na(nhlCurr)] <- 0
 # # # Step 2: Apply PCA # # # # # # # # # # #  
 # # # # # # # # # # # # # # # # # # # # # # # 
 # copy over the data from Step 1
+# these two lines need to be run separately
 d <- nhlData
 d <- nhlCurr
+
 #categorize 
 grit <- d[,c("W", "ROW", "OT", "FOW.", "OZFO.", "DZFO.", "NZFO.")]
 
@@ -120,6 +121,7 @@ nhlPCA <- cbind(d[,1:6], PCA.grit, PCA.offense, PCA.defense, PCA.other, PCA.hist
 
 PCA.tng <- nhlPCA
 PCA.curr <- nhlPCA
+
 # # # # # # # # # # # # # # # # # # # # # #
 # # # Separate Training and Test Sets # # #
 # # # # # # # # # # # # # # # # # # # # # #
@@ -206,11 +208,6 @@ results <- data.frame(team = teamNames,
                       rank = pred)
 results
 write.csv(results, "nbV4_2017.csv", row.names = F)
-
-
-
-
-
 
 plot(as.numeric(nb.results$nb), as.numeric(nb.results$actual))
 write.csv(nb.results, "NaiveBay_NHL2016_Results.csv", row.names = F)
