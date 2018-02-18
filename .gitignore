@@ -1,1 +1,5 @@
 Data/*
+*.yml
+**/*.Rhistory
+**/*.ipynb_checkpoints
+**/*__pycache__
