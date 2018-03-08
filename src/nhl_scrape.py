@@ -4,8 +4,10 @@ import errno
 import csv
 import pandas as pd
 
-def get_player_ids:
+def get_player_ids(toCsv=True, return_df=True):
     '''returns a list of player ids used at hockey-reference.com'''
+    # TODO: the list returns contains several bad strings, such as "skaters"
+    # or "goalie" we'll want to remove these somehow
     letters = list(string.ascii_lowercase)
     for letter in letters:
 
@@ -23,5 +25,8 @@ def get_player_ids:
             if len(line1) < 15:
                 players.append(line1)
 
-    df = pd.DataFrame(players, columns=["colummn"])
-    df.to_csv('players_all.csv', index=False)
+    if(toCsv):
+        df = pd.DataFrame(players, columns=["colummn"])
+        df.to_csv('players_all.csv', index=False)
+    if(return_df):
+        return df
