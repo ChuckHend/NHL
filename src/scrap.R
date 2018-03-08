@@ -3,8 +3,8 @@ library(XML)
 library(stringr)
 library(httr)
 
-nhl<-NULL
 years <- seq(from=1920,to=2017)
+# remove 2015 from the list, since this was a lockout year (season did not happen)
 years <- years[years!=2005]
 
 urls.list <- c()
@@ -12,6 +12,7 @@ for(year in years){
   urls.list <- c(urls.list, paste("http://www.hockey-reference.com/leagues/NHL_",year,"_games.html", sep=''))
 }
 
+nhl<-NULL
 for (i in 1:length(urls.list)){
   table <- GET(urls.list[i])
   tables <- readHTMLTable(rawToChar(table$content))
