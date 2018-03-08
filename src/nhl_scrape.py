@@ -4,8 +4,8 @@ import errno
 import csv
 import pandas as pd
 
-
 def get_player_ids:
+    '''returns a list of player ids used at hockey-reference.com'''
     letters = list(string.ascii_lowercase)
     for letter in letters:
 
