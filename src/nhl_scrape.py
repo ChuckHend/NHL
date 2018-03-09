@@ -51,11 +51,12 @@ def get_career_playoff(player):
     # 2nd get playoff stats (this is career stats)
     url='https://www.hockey-reference.com/players/{}/{}/gamelog/playoffs'.format(player[0],player)
     r = requests.get(url)
-    root = LH.fromstring(r.content)
+    r = r.text.replace("<!--", "")
+    root = LH.fromstring(r)
     header=['Date','G','Age','Tm','@','Opp','W/L.OT','G','A',
             'PTS','+/-','PIM','EV','PP','SH','GW','EV','PP','SH',
             'S','S%','SHFT','TOI','HIT','BLK','FOW','FOL','FO%']
-    outHeader = header + ['playerID']
+    outHeader = header + ['playerID','season']
     playoffDF = pd.DataFrame(columns=outHeader)
     for table in root.xpath('//*[@id="gamelog_playoffs"]'):
         data = [[text(td) for td in tr.xpath('td')] for tr in table.xpath('//tr')]
@@ -63,7 +64,7 @@ def get_career_playoff(player):
         data = pd.DataFrame(data, columns=header)
         data['playerID']=player
         data['season']='playoff'
-        playoffDF=pd.concat([playoff, data])
+        playoffDF=pd.concat([playoffDF, data])
     return playoffDF
 
 def get_player_stats(players, years=range(1980,2018)):
