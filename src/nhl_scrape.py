@@ -24,17 +24,17 @@ def get_player_ids(toCsv=True, return_list=True):
             print('\rError loading player data for letter [{}]'.format(letter))
         # parse out player IDs
         d = res.text
-        a=d.split('<a href="/players/{}/'.format(letter))
+        a = d.split('<a href="/players/{}/'.format(letter))
         for x in a:
-            line1=x.split('.html')[0]
+            line1 = x.split('.html')[0]
             if len(line1) < 15:
                 players.append(line1)
 
-    dropStrings=[]
+    dropStrings = []
     for x in players:
         if not x[-1].isdigit():
             dropStrings.append(x)
-        dropStrings=list(set(dropStrings))
+        dropStrings = list(set(dropStrings))
     players = [c for c in players if c not in dropStrings]
 
     print('\rTime to retrieve: {}'.format(round(time.time()-start),2))
