@@ -6,7 +6,6 @@ import sys
 import pandas as pd
 import time
 import lxml.html as LH
-import requests
 
 def get_player_ids(toCsv=True, return_list=True):
     '''returns a list of player ids used at hockey-reference.com'''
@@ -48,6 +47,25 @@ def get_player_ids(toCsv=True, return_list=True):
 def text(elt):
     return elt.text_content().replace(u'\xa0', u' ')
 
+def get_career_playoff(player):
+    # 2nd get playoff stats (this is career stats)
+    url='https://www.hockey-reference.com/players/{}/{}/gamelog/playoffs'.format(player[0],player)
+    r = requests.get(url)
+    root = LH.fromstring(r.content)
+    header=['Date','G','Age','Tm','@','Opp','W/L.OT','G','A',
+            'PTS','+/-','PIM','EV','PP','SH','GW','EV','PP','SH',
+            'S','S%','SHFT','TOI','HIT','BLK','FOW','FOL','FO%']
+    outHeader = header + ['playerID']
+    playoffDF = pd.DataFrame(columns=outHeader)
+    for table in root.xpath('//*[@id="gamelog_playoffs"]'):
+        data = [[text(td) for td in tr.xpath('td')] for tr in table.xpath('//tr')]
+        data = [row for row in data if len(row)==len(header)]
+        data = pd.DataFrame(data, columns=header)
+        data['playerID']=player
+        data['season']='playoff'
+        playoffDF=pd.concat([playoff, data])
+    return playoffDF
+
 def get_player_stats(players, years=range(1980,2018)):
     '''iterate through player list and year range to table of the game logs'''
     # TODO: consider starting with recent years for every player...for example:
@@ -60,10 +78,12 @@ def get_player_stats(players, years=range(1980,2018)):
     playersDF = pd.DataFrame(columns=outHeader)
 
     totalWork = len(years)*len(players)
-    i=0
-    for year in years:
-        for player in players:
-            url = 'https://www.hockey-reference.com/players/c/{}/gamelog/{}'.format(player, year)
+    i = 0
+    for player in players:
+        for year in years:
+            # first get regular season stats
+            ltr=player[0]
+            url = 'https://www.hockey-reference.com/players/{}/{}/gamelog/{}'.format(ltr, player, year)
             r = requests.get(url)
             root = LH.fromstring(r.content)
             for table in root.xpath('//*[@id="gamelog"]'):
@@ -71,11 +91,13 @@ def get_player_stats(players, years=range(1980,2018)):
                 data = [row for row in data if len(row)==len(header)]
                 data = pd.DataFrame(data, columns=header)
                 data['playerID']=player
+                data['season']='regular'
                 playersDF=pd.concat([playersDF, data])
 
-                i = i + 1
-                progress = round(i/totalWork,2)
-                sys.stdout.write('\rPercentage Complete: {}'.format(progress))
-                sys.stdout.flush()
+            #i = i + 1
+            #print(i, totalWork)
+            #progress = round(i/totalWork,2)
+            #sys.stdout.write('\rPercentage Complete: {}'.format(progress))
+            #sys.stdout.flush()
 
-    return playersDF
+    return playersDF, playoffDF
